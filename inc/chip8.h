@@ -1,9 +1,12 @@
 #include <cstdint>
 #include <random>
 
-#define START_ADDR 0x200
-#define FONTSET_SIZE 80
+#define START_ADDR         0x200
+#define FONTSET_SIZE       80
 #define FONTSET_START_ADDR 50
+#define VIDEO_WIDTH 	   600
+#define VIDEO_HEIGHT       600
+
 // keypad mapping
 /*
 Keypad       Keyboard
@@ -86,4 +89,24 @@ public:
 	void OP_8xy2();
 	void OP_8xy3();
 	void OP_8xy4();
+	void OP_8xy5();
+	void OP_8xy6();
+	void OP_8xy7();
+	void OP_8xyE();
+	void OP_9xy0();
+	void OP_annn();
+	void OP_bnnn();
+	void OP_Cxkk();
+	void OP_Dxyn();
+	void OP_Ex9E();
+	void OP_ExA1();
+	void OP_Fx07();
+	void OP_Fx0A();
+	void OP_Fx15();
+	void OP_Fx18();
+	void OP_Fx1E();
+	void OP_Fx29();
+	void OP_Fx33();
+	void OP_Fx55();
+	void OP_Fx65();
 };

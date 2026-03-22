@@ -179,3 +179,260 @@ void Chip8::OP_8xy4() {
 
 	registers[Vx] = sum & 0xFF;
 }
+
+// SUB Vx, Vy
+void Chip8::OP_8xy5() {
+	uint8_t Vx = get_Vx();
+	uint8_t Vy = get_Vy();
+	uint8_t VF = 0xF;
+
+	if (registers[Vx] > registers[Vy]) {
+		registers[VF] = 1;
+	} else {
+		registers[VF] = 0;
+	}
+
+	registers[Vx] -= registers[Vy];
+}
+
+// SHR Vx
+void Chip8::OP_8xy6() {
+	uint8_t Vx = get_Vx();
+	uint8_t VF = 0xF;
+
+	if (Vx & 1) {
+		registers[VF] = 1;
+	} else {
+		registers[VF] = 0;
+	}
+
+	registers[Vx] >>= 1;
+}
+
+// SUBN Vx, Vy
+void Chip8::OP_8xy7() {
+	uint8_t Vx = get_Vx();
+	uint8_t Vy = get_Vy();
+
+	if (registers[Vy] > registers[Vx]) {
+		registers[0xF] = 1;
+	} else {
+		registers[0xF] = 0;
+	}
+
+	registers[Vx] = registers[Vy] - registers[Vx];
+}
+
+// SHL Vx {, Vy}
+void Chip8::OP_8xyE() {
+	uint8_t Vx = get_Vx();
+
+	registers[0xF] = (registers[Vx] & 0x80) >> 7;
+	registers[Vx] <<= 1;
+}
+
+// SNE Vx, Vy
+void Chip8::OP_9xy0() {
+	uint8_t Vx = get_Vx();
+	uint8_t Vy = get_Vy();
+
+	if (registers[Vx] != registers[Vy]) {
+		pc += 2;
+	}
+}
+
+// LD I, addr
+void Chip8::OP_annn() {
+	index = get_nnn();
+}
+
+// JP V0, addr
+void Chip8::OP_bnnn() {
+	pc = registers[0] + get_nnn();
+}
+
+// RND Vx, byte
+void Chip8::OP_Cxkk() {
+	registers[get_Vx()] = randByte(randGen) & get_byte(); 
+}
+
+// DRW Vx, Vy, nibble
+void Chip8::OP_Dxyn() {
+	uint8_t Vx = get_Vx();
+	uint8_t Vy = get_Vy();
+	uint8_t h = opcode & 0x000F;
+
+	// wrap
+	uint8_t x = registers[Vx] & VIDEO_WIDTH;
+	uint8_t y = registers[Vy] & VIDEO_HEIGHT;
+
+	registers[0xF] = 0;
+
+	for (uint32_t row = 0; row < h; row++) {
+		uint8_t spriteByte = memory[index + row];
+
+		for (uint32_t col = 0; col < 8; col++) {
+			uint8_t spritePixel = spriteByte & (0x80 >> col);
+			uint32_t* screenPixel = &video[(y + row) * VIDEO_WIDTH + (x + col)];
+			
+			// sprite pixel is on
+			if (spritePixel) {
+				// screen pixel is also on; it is a collision!
+				if (*screenPixel == 0xFFFFFFFF) {
+					registers[0xF] = 1;
+				}
+
+				*screenPixel ^= 0xFFFFFFFF;
+			}
+		}
+	}
+}
+
+// SKP Vx
+void Chip8::OP_Ex9E() {
+	uint8_t Vx = get_Vx();
+
+	if (keypad[registers[Vx]]) {
+		pc += 2;
+	}
+}
+
+// SKNP Vx
+void Chip8::OP_ExA1() {
+	uint8_t Vx = get_Vx();
+
+	if (!keypad[registers[Vx]]) {
+		pc += 2;
+	}
+}
+
+// LD Vx, DT
+void Chip8::OP_Fx07() {
+	registers[get_Vx()] = delayTimer;
+}
+
+// LD Vx, K
+void Chip8::OP_Fx0A() {
+	uint8_t Vx = get_Vx();
+
+	if (keypad[0])
+	{
+		registers[Vx] = 0;
+	}
+	else if (keypad[1])
+	{
+		registers[Vx] = 1;
+	}
+	else if (keypad[2])
+	{
+		registers[Vx] = 2;
+	}
+	else if (keypad[3])
+	{
+		registers[Vx] = 3;
+	}
+	else if (keypad[4])
+	{
+		registers[Vx] = 4;
+	}
+	else if (keypad[5])
+	{
+		registers[Vx] = 5;
+	}
+	else if (keypad[6])
+	{
+		registers[Vx] = 6;
+	}
+	else if (keypad[7])
+	{
+		registers[Vx] = 7;
+	}
+	else if (keypad[8])
+	{
+		registers[Vx] = 8;
+	}
+	else if (keypad[9])
+	{
+		registers[Vx] = 9;
+	}
+	else if (keypad[10])
+	{
+		registers[Vx] = 10;
+	}
+	else if (keypad[11])
+	{
+		registers[Vx] = 11;
+	}
+	else if (keypad[12])
+	{
+		registers[Vx] = 12;
+	}
+	else if (keypad[13])
+	{
+		registers[Vx] = 13;
+	}
+	else if (keypad[14])
+	{
+		registers[Vx] = 14;
+	}
+	else if (keypad[15])
+	{
+		registers[Vx] = 15;
+	}
+	else
+	{
+		pc -= 2;
+	}
+}
+
+// LD DT, Vx
+void Chip8::OP_Fx15() {
+	delayTimer = registers[get_Vx()];
+}
+
+// LD ST, Vx
+void Chip8::OP_Fx18() {
+	soundTimer = registers[get_Vx()];
+}
+
+// ADD I, Vx
+void Chip8::OP_Fx1E() {
+	index += registers[Vx];
+}
+
+// LD F, Vx
+void Chip8::OP_Fx29() {
+	index = FONTSET_START_ADDR + (5 * registers[get_Vx()]);
+}
+
+// LD B, Vx
+void Chip8::OP_Fx33() {
+	uint8_t temp = registers[get_Vx()];
+
+	// ones digit
+	memory[index + 2] = temp % 10;
+	temp /= 10;
+
+	// tens digit
+	memory[index + 1] = temp % 10;
+	temp /= 10;
+
+	// hundreds digit
+	memory[index] = temp % 10;
+}
+
+// LD [I], Vx
+void Chip8::OP_Fx55() {
+	uint8_t Vx = get_Vx();
+	for (uint32_t i = 0; i <= Vx; i++) {
+		memory[index + i] = registers[i];
+	}
+}
+
+// LD Vx, [I]
+void Chip8::OP_Fx65() {
+	uint8_t Vx = get_Vx();
+	for(uint32_t i = 0; i <= Vx; i++) {
+		registers[i] = memory[index + i];
+	}
+}
