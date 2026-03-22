@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -I$(INC_DIR) $(shell sdl2-config --cflags)
+CXXFLAGS = -std=c++17 -Wall -Wextra -g  -I$(INC_DIR) $(shell sdl2-config --cflags)
 LDFLAGS = $(shell sdl2-config --libs)
 
 BUILD_DIR = build

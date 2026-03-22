@@ -4,8 +4,8 @@
 #define START_ADDR         0x200
 #define FONTSET_SIZE       80
 #define FONTSET_START_ADDR 50
-#define VIDEO_WIDTH 	   600
-#define VIDEO_HEIGHT       600
+#define VIDEO_WIDTH 	   64
+#define VIDEO_HEIGHT       32
 
 // keypad mapping
 /*
