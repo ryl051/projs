@@ -1,0 +1,24 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -I$(INC_DIR)
+
+BUILD_DIR = build
+SRC_DIR = src
+INC_DIR = inc
+
+TARGET = $(BUILD_DIR)/chip8emu
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+clean:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: clean
