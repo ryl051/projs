@@ -25,8 +25,14 @@ int main(int argc, char** argv) {
 
 	while (!quit) {
 		quit = platform.ProcessInput(chip8.keypad, &paused);
-
+		
+		// skip cycle if user hit the pause key
 		if (paused) {
+			continue;
+		}
+		
+		// skip cycle if we are in debug mode
+		if (chip8.stepping && !chip8.stepReady) {
 			continue;
 		}
 

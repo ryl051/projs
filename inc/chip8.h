@@ -82,9 +82,11 @@ public:
 	uint8_t  sp{};
 	uint8_t  delayTimer{};
 	uint8_t  soundTimer{};
-	uint8_t  keypad[16]{};      // mapping described below class
+	uint8_t  keypad[16]{};     // mapping described below class
 	uint32_t video[64 * 32]{}; // storing graphics !! 
 	uint16_t opcode;
+	bool stepping; 			   // are we in single stepping (debugging mode)?
+	bool stepReady; 		   // user pressed "next" like in gdb
 
 	Chip8();
 	void LoadROM(const char* filename);
