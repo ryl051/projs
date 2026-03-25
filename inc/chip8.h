@@ -28,7 +28,7 @@ private:
 	uint8_t get_Vx();
 	uint8_t get_Vy();
 	uint8_t get_byte();
-	uint8_t get_nnn();
+	uint16_t get_nnn();
 
 	// loading the fonts, where do we get the bytes from?
 	// i.e. for the letter 'F'

@@ -23,7 +23,7 @@ void Platform::Update(void const* buffer, int pitch) {
     SDL_RenderPresent(renderer);
 }
 
-bool Platform::ProcessInput(uint8_t* keys)
+bool Platform::ProcessInput(uint8_t* keys, bool* paused)
 {
     bool quit = false;
 
@@ -42,6 +42,10 @@ bool Platform::ProcessInput(uint8_t* keys)
             {
                 switch (event.key.keysym.sym)
                 {
+					case SDLK_p:
+					{
+						*paused = !*paused;
+					} break;
                     case SDLK_ESCAPE:
                     {
                         quit = true;

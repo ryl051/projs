@@ -21,9 +21,14 @@ int main(int argc, char** argv) {
 	int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
 	bool quit = false;
+	bool paused = false;
 
 	while (!quit) {
-		quit = platform.ProcessInput(chip8.keypad);
+		quit = platform.ProcessInput(chip8.keypad, &paused);
+
+		if (paused) {
+			continue;
+		}
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();

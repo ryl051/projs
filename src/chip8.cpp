@@ -118,7 +118,7 @@ void Chip8::LoadROM(char const* filename) {
 
 // Helpers:
 uint8_t Chip8::get_Vx() {
-	return this->opcode & (0x0F00) >> 8;
+	return (this->opcode & 0x0F00) >> 8;
 }
 
 uint8_t Chip8::get_Vy() {
@@ -129,7 +129,7 @@ uint8_t Chip8::get_byte() {
 	return this->opcode & 0x00FF;
 }
 
-uint8_t Chip8::get_nnn() {
+uint16_t Chip8::get_nnn() {
 	return this->opcode & 0x0FFF;
 }
 
@@ -272,7 +272,7 @@ void Chip8::OP_8xy6() {
 	uint8_t Vx = get_Vx();
 	uint8_t VF = 0xF;
 
-	if (Vx & 1) {
+	if (registers[Vx] & 1) {
 		registers[VF] = 1;
 	} else {
 		registers[VF] = 0;
@@ -335,8 +335,8 @@ void Chip8::OP_Dxyn() {
 	uint8_t h = opcode & 0x000F;
 
 	// wrap
-	uint8_t x = registers[Vx] & VIDEO_WIDTH;
-	uint8_t y = registers[Vy] & VIDEO_HEIGHT;
+	uint8_t x = registers[Vx] % VIDEO_WIDTH;
+	uint8_t y = registers[Vy] % VIDEO_HEIGHT;
 
 	registers[0xF] = 0;
 
