@@ -1,6 +1,6 @@
 # chip8 emulator!!
 
-built with sdl2 library for graphics. everything else is just cpp.
+built with sdl2 library for graphics, and key press events.
 
 to build, just run `make` in the root dir.
 
