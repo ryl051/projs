@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	bool paused = false;
 
 	while (!quit) {
-		quit = platform.ProcessInput(chip8.keypad, &paused);
+		quit = platform.ProcessInput(chip8, chip8.keypad, &paused);
 		
 		// skip cycle if user hit the pause key
 		if (paused) {
@@ -35,12 +35,14 @@ int main(int argc, char** argv) {
 		if (chip8.stepping && !chip8.stepReady) {
 			continue;
 		}
-
+		
+		
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 		if (dt > cycleDelay) {
 			lastCycleTime = currentTime;
 			chip8.Cycle();
+			chip8.stepReady = false;
 			platform.Update(chip8.video, videoPitch);
 		}
 	}

@@ -23,7 +23,7 @@ void Platform::Update(void const* buffer, int pitch) {
     SDL_RenderPresent(renderer);
 }
 
-bool Platform::ProcessInput(uint8_t* keys, bool* paused)
+bool Platform::ProcessInput(Chip8 chip8, uint8_t* keys, bool* paused)
 {
     bool quit = false;
 
@@ -42,6 +42,15 @@ bool Platform::ProcessInput(uint8_t* keys, bool* paused)
             {
                 switch (event.key.keysym.sym)
                 {
+                    case SDLK_F5:
+                    {
+                        chip8.stepping = !chip8.stepping;
+                        chip8.stepReady = false;
+                    } break;
+                    case SDLK_F6:
+                    {
+                        chip8.stepReady = true;
+                    } break;
 					case SDLK_p:
 					{
 						*paused = !*paused;

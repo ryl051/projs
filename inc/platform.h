@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <cstdint>
+#include "chip8.h"
 
 class Platform
 {
@@ -15,5 +16,5 @@ private:
     Platform(char const* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
     ~Platform();
     void Update(void const* buffer, int pitch);
-    bool ProcessInput(uint8_t* keys, bool* paused);
+    bool ProcessInput(Chip8 chip8, uint8_t* keys, bool* paused);
 };
