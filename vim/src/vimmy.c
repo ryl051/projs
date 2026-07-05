@@ -39,14 +39,15 @@ void refreshScreen(Buffer *buf) {
     } else {
       write(STDOUT_FILENO, "~", 1);
     }
-    write(STDOUT_FILENO, "\x1b[K", 3);  // clear rest of line
+    write(STDOUT_FILENO, "\x1b[K", 3); // clear rest of line
     if (i < window_size.ws_row - 1) {
       write(STDOUT_FILENO, "\r\n", 2);
     }
   }
 
   char cursorBuf[32];
-  int len = snprintf(cursorBuf, sizeof(cursorBuf), "\x1b[%d;%dH", cy + 1, cx + 1);
+  int len =
+      snprintf(cursorBuf, sizeof(cursorBuf), "\x1b[%d;%dH", cy + 1, cx + 1);
   write(STDOUT_FILENO, cursorBuf, len);
   write(STDOUT_FILENO, "\x1b[?25h", 6); // show cursor
 }
@@ -59,11 +60,10 @@ int getWindowSize() {
   return 0;
 }
 
-
 /*
-* This func is written by ai. essentially reads a file and expands array if we 
-* have too much data; like dynamic array
-*/
+ * This func is written by ai. essentially reads a file and expands array if we
+ * have too much data; like dynamic array
+ */
 void openFile(Buffer *buf, const char *filename) {
   FILE *fp = fopen(filename, "r");
   if (!fp) {
@@ -105,42 +105,55 @@ int main(int argc, char *argv[]) {
   while (1) {
     char c;
     refreshScreen(&buf);
+
     read(STDIN_FILENO, &c, 1);
 
     if (mode == NORMAL_MODE) {
-      switch(c) {
-        case 'h': {
-          if (cx > 0) cx--;
-          break;
-        }
-        case 'j': {
-          if (cy + 1 < window_size.ws_row) cy++;
-          break;
-        }
-        case 'k': {
-          if (cy > 0) cy--;
-          break;
-        }
-        case 'l': {
-          if (cx + 1 < window_size.ws_col) cx++;
-          break;
-        }
-        case 'q': {
-          return 0;
-        }
-        case 'i': {
-          mode = INSERT_MODE;
-          break;
-        }
+      switch (c) {
+      case 'h': {
+        if (cx > 0)
+          cx--;
+        break;
+      }
+      case 'j': {
+        if (cy + 1 < window_size.ws_row)
+          cy++;
+        break;
+      }
+      case 'k': {
+        if (cy > 0)
+          cy--;
+        break;
+      }
+      case 'l': {
+        if (cx + 1 < window_size.ws_col)
+          cx++;
+        break;
+      }
+      case 'q': {
+        return 0;
+      }
+      case 'i': {
+        mode = INSERT_MODE;
+        break;
+      }
+      case 'a': {
+        if (cx + 1 < window_size.ws_col)
+          cx++;
+        mode = INSERT_MODE;
+        break;
+      }
       }
     } else {
       if (c == '\x1b') {
         mode = NORMAL_MODE;
       } else {
         // insert actual character
-        Row* row = &buf.rows[cy];
-        row->chars = realloc(row->chars, row->len + 2); // +1 for new char, +1 for '\0'
-        memmove(&row->chars[cx + 1], &row->chars[cx], row->len - cx + 1); // shift right (includes '\0')
+        Row *row = &buf.rows[cy];
+        row->chars =
+            realloc(row->chars, row->len + 2); // +1 for new char, +1 for '\0'
+        memmove(&row->chars[cx + 1], &row->chars[cx],
+                row->len - cx + 1); // shift right (includes '\0')
         row->chars[cx] = c;
         row->len++;
         cx++;
