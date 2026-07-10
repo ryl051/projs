@@ -1,4 +1,5 @@
 #include "vimmy.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,11 @@ void enableRawMode() {
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
+/*
+ * this function redraws the entire screen after a keypress. without this,
+ * we wouldn't see the cursor move, and the text updates wouldn't appear on the
+ * actual screen.
+ */
 void refreshScreen(Buffer *buf) {
   write(STDOUT_FILENO, "\x1b[?25l", 6); // hide cursor
   write(STDOUT_FILENO, "\x1b[H", 3);    // move to top-left
@@ -94,6 +100,35 @@ void openFile(Buffer *buf, const char *filename) {
   fclose(fp);
 }
 
+void row_delete_char(Row *row, int cx) {
+  if (cx <= 0 || cx > row->len)
+    return;
+
+  memmove(&row->chars[cx - 1], &row->chars[cx], row->len - cx + 1);
+  row->len--;
+
+  row->chars = realloc(row->chars, row->len + 1);
+}
+
+void buffer_delete_row(Buffer *buf, int cy) {
+  if (cy < 0 || cy >= buf->num_rows)
+    return;
+
+  int num_rows_to_move = buf->num_rows - cy - 1;
+  if (num_rows_to_move > 0) {
+    memmove(&buf->rows[cy], &buf->rows[cy + 1], sizeof(Row) * num_rows_to_move);
+  }
+
+  buf->num_rows--;
+
+  if (buf->num_rows == 0) {
+    free(buf->rows);
+    buf->rows = NULL;
+  } else {
+    buf->rows = realloc(buf->rows, sizeof(Row) * buf->num_rows);
+  }
+}
+
 int main(int argc, char *argv[]) {
   enableRawMode();
   getWindowSize();
@@ -108,6 +143,7 @@ int main(int argc, char *argv[]) {
 
     read(STDIN_FILENO, &c, 1);
 
+    // normal mode
     if (mode == NORMAL_MODE) {
       switch (c) {
       case 'h': {
@@ -143,20 +179,49 @@ int main(int argc, char *argv[]) {
         mode = INSERT_MODE;
         break;
       }
+      case 'd': {
+        // wait for another input
+        while (1) {
+          char cc;
+          refreshScreen(&buf);
+          read(STDIN_FILENO, &cc, 1);
+          switch (cc) {
+          case 'd': {
+            buffer_delete_row(&buf, cy);
+            break;
+          }
+          }
+        }
       }
+      }
+      // insert mode
     } else {
-      if (c == '\x1b') {
+      switch (c) {
+      case '\x1b': {
         mode = NORMAL_MODE;
-      } else {
+        break;
+      }
+      case '\b':
+      case '\x7f': {
+        if (cx > 0) {
+          Row *row = &buf.rows[cy];
+          row_delete_char(row, cx);
+          cx--;
+        }
+        break;
+      }
+      default: {
         // insert actual character
         Row *row = &buf.rows[cy];
-        row->chars =
-            realloc(row->chars, row->len + 2); // +1 for new char, +1 for '\0'
+        row->chars = realloc(row->chars,
+                             row->len + 2); // +1 for new char, +1 for '\0'
         memmove(&row->chars[cx + 1], &row->chars[cx],
                 row->len - cx + 1); // shift right (includes '\0')
         row->chars[cx] = c;
         row->len++;
         cx++;
+        break;
+      }
       }
     }
   }
